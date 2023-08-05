@@ -72,17 +72,20 @@ precedence = (
     )
 
 # dictionary of names
-names = { "PI":np.pi, "e":np.e }
+names = { "PI":np.pi, "e":np.e , "i": bases[0], "j": bases[1], "k":bases[2]}
+# the default ones should not be writable
+consts = set(names.keys())
 
 def p_statement_assign(t):
     'statement : NAME EQUALS expression' # and these to define
-    names[t[1]] = t[3]
+    if t[1] not in consts:
+        names[t[1]] = t[3]
 
 def p_statement_expr(t):
     'statement : expression'
     print(t[1])
 
-def tuple_reduce(t):
+def tuple_safe(t):
     if type(t) == tuple:
         if len(t) > 0:
             return t[-1]
@@ -120,10 +123,10 @@ def p_expression_binop(t):
                   | expression TIMES expression
                   | expression COMMA expression
                   | expression DIVIDE expression'''
-    if t[2] == '+'  : t[0] = tuple_reduce(t[1]) + tuple_reduce(t[3])
-    elif t[2] == '-': t[0] = tuple_reduce(t[1]) - tuple_reduce(t[3])
-    elif t[2] == '*': t[0] = tuple_reduce(t[1]) * tuple_reduce(t[3])
-    elif t[2] == '/': t[0] = tuple_reduce(t[1]) / tuple_reduce(t[3])
+    if t[2] == '+'  : t[0] = tuple_safe(t[1]) + tuple_safe(t[3])
+    elif t[2] == '-': t[0] = tuple_safe(t[1]) - tuple_safe(t[3])
+    elif t[2] == '*': t[0] = tuple_safe(t[1]) * tuple_safe(t[3])
+    elif t[2] == '/': t[0] = tuple_safe(t[1]) / tuple_safe(t[3])
     elif t[2] == t_COMMA:
         if type(t[1]) == tuple:
             t[0] = (*t[1], t[3])
@@ -133,7 +136,7 @@ def p_expression_binop(t):
 
 def p_expression_uminus(t):
     'expression : MINUS expression %prec UMINUS'
-    t[0] = -tuple_reduce(t[2])
+    t[0] = -tuple_safe(t[2])
 
 def p_expression_group(t):
     'expression : LPAREN expression RPAREN'
@@ -165,7 +168,7 @@ parser = yacc.yacc(debug=False, write_tables=False)
 
 while True:
     try:
-        s = input('calc > ')   # Use raw_input on Python 2
+        s = input('Q> ')   # Use raw_input on Python 2
     except EOFError:
         break
     parser.parse(s)
