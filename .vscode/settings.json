@@ -1,0 +1,24 @@
+{
+  "black-formatter.importStrategy": "fromEnvironment",
+  "isort.args": [
+    "--profile",
+    "black"
+  ],
+  "isort.importStrategy": "fromEnvironment",
+  "python.formatting.provider": "none",
+  "python.linting.ignorePatterns": [
+    "**/site-packages/**/*.py"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+      88
+    ]
+  }
+}
