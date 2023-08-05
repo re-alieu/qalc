@@ -68,10 +68,11 @@ precedence = (
     ('left','PLUS','MINUS'),
     ('left','TIMES','DIVIDE'),
     ('right','UMINUS'),
+    ('left', 'NAME')
     )
 
 # dictionary of names
-names = { }
+names = { "PI":np.pi, "e":np.e }
 
 def p_statement_assign(t):
     'statement : NAME EQUALS expression' # and these to define
@@ -93,6 +94,10 @@ def tuple_reduce(t):
 functions = {
     'cos': np.cos,
     'sin': np.sin,
+    'sqrt': np.sqrt,
+    'tan':np.tan,
+    'arctan':np.arctan,
+    'norm': np.abs,
 }
 
 def p_experssion_func(t):
@@ -101,6 +106,8 @@ def p_experssion_func(t):
         func_to_call = functions[t[1]]
         if type(t[2]) == tuple:
             t[0] = func_to_call(*t[2])
+        elif t[2] is None:
+            t[0] = func_to_call()
         else:
             t[0] = func_to_call(t[2])
     else:
@@ -131,6 +138,10 @@ def p_expression_uminus(t):
 def p_expression_group(t):
     'expression : LPAREN expression RPAREN'
     t[0] = t[2]
+
+def p_expression_empty_set(t):
+    'expression : LPAREN RPAREN'
+    t[0] = None
 
 def p_expression_number(t):
     'expression : NUMBER'
