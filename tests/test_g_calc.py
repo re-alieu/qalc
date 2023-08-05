@@ -1,4 +1,4 @@
-from g_calc import __version__
+from q_calc import __version__
 
 
 def test_version():
