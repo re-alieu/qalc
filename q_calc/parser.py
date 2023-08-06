@@ -1,5 +1,6 @@
 import logging
 import re
+from prompt_toolkit import prompt, history, completion
 
 import numpy as np
 import quaternion as qn
@@ -96,11 +97,14 @@ def tuple_safe(t):
 
 functions = {
     'cos': np.cos,
+    'arccos': np.arccos,
     'sin': np.sin,
+    'arcsin': np.arcsin,
     'sqrt': np.sqrt,
     'tan':np.tan,
     'arctan':np.arctan,
     'norm': np.abs,
+    'exp': np.exp
 }
 
 def p_experssion_func(t):
@@ -166,9 +170,12 @@ import ply.yacc as yacc
 # write_tables=False makes PLY stop generating the parser python file
 parser = yacc.yacc(debug=False, write_tables=False)
 
-while True:
-    try:
-        s = input('Q> ')   # Use raw_input on Python 2
-    except EOFError:
-        break
-    parser.parse(s)
+if __name__ == '__main__':
+    history=history.InMemoryHistory()
+    func_completer = completion.WordCompleter(functions.keys())
+    while True:
+        try:
+            s = prompt('Q>', history=history, completer=func_completer)
+            parser.parse(s)
+        except EOFError:
+            break

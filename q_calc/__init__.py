@@ -4,3 +4,5 @@ __version__ = "1.0.0"
 # numpy-quaternion adds a quaternion type to numpy https://github.com/moble/quaternion
 # so the goal of this little project is to design a simple DSL that makes working with quaternions
 # easier.
+# https://github.com/prompt-toolkit/python-prompt-toolkit gives some advanced shell feature
+# with minimal change
