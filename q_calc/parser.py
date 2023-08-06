@@ -108,15 +108,13 @@ functions = {
 }
 
 def p_experssion_func(t):
-    r'expression : NAME expression'
+    r'expression : NAME LPAREN expression RPAREN'
     if t[1] in functions:
         func_to_call = functions[t[1]]
-        if type(t[2]) == tuple:
-            t[0] = func_to_call(*t[2])
-        elif t[2] is None:
+        if t[3] is None:
             t[0] = func_to_call()
         else:
-            t[0] = func_to_call(t[2])
+            t[0] = func_to_call(t[3])
     else:
         print("unknown function:", t[1])
         return np.nan
@@ -133,9 +131,9 @@ def p_expression_binop(t):
     elif t[2] == '/': t[0] = tuple_safe(t[1]) / tuple_safe(t[3])
     elif t[2] == t_COMMA:
         if type(t[1]) == tuple:
-            t[0] = (*t[1], t[3])
+            t[0] = [*t[1], t[3]]
         else:
-            t[0] = (t[1], t[3])
+            t[0] = [t[1], t[3]]
 
 
 def p_expression_uminus(t):
