@@ -43,8 +43,7 @@ def t_NUMBER(t):
             a1 = a1 * bases[2]
         t.value = a1
     except ValueError:
-        print("Invalid numerical value: {}".format(t.value))
-        t.value = np.nan
+        raise SyntaxError("Invalid numerical value: {}".format(t.value))
     return t
 
 # Ignored characters
@@ -118,7 +117,6 @@ def p_experssion_func(t):
             t[0] = func_to_call(t[3])
     else:
         raise RuntimeError("unknown function: %s"% t[1])
-        return np.nan
 
 def p_expression_binop(t):
     '''expression : expression PLUS expression
