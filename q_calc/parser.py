@@ -1,6 +1,7 @@
 import logging
 import re
 from prompt_toolkit import prompt, history, completion
+import sys
 
 import numpy as np
 import quaternion as qn
@@ -42,8 +43,8 @@ def t_NUMBER(t):
             a1 = a1 * bases[2]
         t.value = a1
     except ValueError:
-        print("Invalid numerical value", t.value)
-        t.value = 0
+        print("Invalid numerical value: {}".format(t.value))
+        t.value = np.nan
     return t
 
 # Ignored characters
@@ -54,7 +55,7 @@ def t_newline(t):
     t.lexer.lineno += t.value.count("\n")
     
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
+    raise SyntaxError("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
     
 # Build the lexer
@@ -69,7 +70,7 @@ precedence = (
     ('left','PLUS','MINUS'),
     ('left','TIMES','DIVIDE'),
     ('right','UMINUS'),
-    ('left', 'NAME')
+    ('right', 'NAME')
     )
 
 # dictionary of names
@@ -116,7 +117,7 @@ def p_experssion_func(t):
         else:
             t[0] = func_to_call(t[3])
     else:
-        print("unknown function:", t[1])
+        raise RuntimeError("unknown function: %s"% t[1])
         return np.nan
 
 def p_expression_binop(t):
@@ -157,11 +158,11 @@ def p_expression_name(t):
     try:
         t[0] = names[t[1]]
     except LookupError:
-        print("Undefined name '%s'" % t[1])
+        raise RuntimeError("Undefined name '%s'" % t[1])
         t[0] = 0
 
 def p_error(t):
-    print("Syntax error at '%s'" % t.value)
+    raise SyntaxError("Syntax error at '%s'" % t.value)
 
 import ply.yacc as yacc
 
@@ -177,3 +178,9 @@ if __name__ == '__main__':
             parser.parse(s)
         except EOFError:
             break
+        except RuntimeError as ex:
+            print(ex, file=sys.stderr)
+            continue
+        except SyntaxError as ex:
+            print(ex, file=sys.stderr)
+            continue
