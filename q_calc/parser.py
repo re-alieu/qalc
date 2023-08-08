@@ -97,6 +97,9 @@ def inner(q1, q2):
     comp2 = qn.as_float_array(q2)
     return sum((x*y for x,y in zip(comp1, comp2)))
 
+def outer(q1, q2):
+    return (q1*q2 - q2*q1)/2
+
 
 functions = {
     'cos': np.cos,
@@ -110,7 +113,8 @@ functions = {
     'exp': np.exp,
     'conj':np.conjugate,
     'pow': np.power,
-    'dot': inner
+    'dot': inner,
+    'cross': outer
 }
 
 
