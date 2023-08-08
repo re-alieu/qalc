@@ -8,7 +8,6 @@ import quaternion as qn
 
 logger = logging.getLogger(__name__)
 
-
 tokens = (
     'NAME','NUMBER',
     'PLUS','MINUS','TIMES','DIVIDE','EQUALS',
@@ -35,12 +34,10 @@ def t_NUMBER(t):
     try:
         p = numbers_pattern.split(t.value)
         a1 = float(p[1])
-        if p[2] == 'i':
-            a1 = a1 * bases[0]
-        elif p[2] == 'j':
-            a1 = a1 * bases[1]
-        elif p[2] == 'k':
-            a1 = a1 * bases[2]
+        if p[2] == 'i'  :a1 = a1 * bases[0]
+        elif p[2] == 'j':a1 = a1 * bases[1]
+        elif p[2] == 'k':a1 = a1 * bases[2]
+        else:            a1 = a1 * qn.one
         t.value = a1
     except ValueError:
         raise SyntaxError("Invalid numerical value: {}".format(t.value))
@@ -86,14 +83,20 @@ def p_statement_expr(t):
     'statement : expression'
     print(t[1])
 
-def tuple_safe(t):
-    if type(t) == tuple:
+def list_safe(t):
+    if type(t) == list:
         if len(t) > 0:
             return t[-1]
         else:
             return np.nan
     else:
         return t
+
+def inner(q1, q2):
+    comp1 = qn.as_float_array(q1)
+    comp2 = qn.as_float_array(q2)
+    return sum((x*y for x,y in zip(comp1, comp2)))
+
 
 functions = {
     'cos': np.cos,
@@ -104,8 +107,18 @@ functions = {
     'tan':np.tan,
     'arctan':np.arctan,
     'norm': np.abs,
-    'exp': np.exp
+    'exp': np.exp,
+    'conj':np.conjugate,
+    'pow': np.power,
+    'dot': inner
 }
+
+
+def quaternion_downconvert(q):
+    comp = qn.as_float_array(q)
+    if comp[2] != 0 or comp[3] != 0: return q
+    elif comp[1] != 0: return np.complex(comp[0], comp[1])
+    else: return comp[0]
 
 def p_experssion_func(t):
     r'expression : NAME LPAREN expression RPAREN'
@@ -114,7 +127,13 @@ def p_experssion_func(t):
         if t[3] is None:
             t[0] = func_to_call()
         else:
-            t[0] = func_to_call(t[3])
+            if type(t[3]) == list: pargs = [quaternion_downconvert(q) for q in t[3]]
+            else: pargs = quaternion_downconvert(t[3])
+            try:
+                t[0] = func_to_call(pargs)
+            except TypeError as ex:
+                if type(t[3]) == list: t[0] = func_to_call(*pargs)
+                else: raise ex
     else:
         raise RuntimeError("unknown function: %s"% t[1])
 
@@ -124,12 +143,12 @@ def p_expression_binop(t):
                   | expression TIMES expression
                   | expression COMMA expression
                   | expression DIVIDE expression'''
-    if t[2] == '+'  : t[0] = tuple_safe(t[1]) + tuple_safe(t[3])
-    elif t[2] == '-': t[0] = tuple_safe(t[1]) - tuple_safe(t[3])
-    elif t[2] == '*': t[0] = tuple_safe(t[1]) * tuple_safe(t[3])
-    elif t[2] == '/': t[0] = tuple_safe(t[1]) / tuple_safe(t[3])
-    elif t[2] == t_COMMA:
-        if type(t[1]) == tuple:
+    if   t[2] == '+': t[0] = list_safe(t[1]) + list_safe(t[3])
+    elif t[2] == '-': t[0] = list_safe(t[1]) - list_safe(t[3])
+    elif t[2] == '*': t[0] = list_safe(t[1]) * list_safe(t[3])
+    elif t[2] == '/': t[0] = list_safe(t[1]) / list_safe(t[3])
+    elif t[2] == ',':
+        if type(t[1]) == list:
             t[0] = [*t[1], t[3]]
         else:
             t[0] = [t[1], t[3]]
@@ -137,7 +156,7 @@ def p_expression_binop(t):
 
 def p_expression_uminus(t):
     'expression : MINUS expression %prec UMINUS'
-    t[0] = -tuple_safe(t[2])
+    t[0] = -list_safe(t[2])
 
 def p_expression_group(t):
     'expression : LPAREN expression RPAREN'
@@ -168,6 +187,7 @@ import ply.yacc as yacc
 parser = yacc.yacc(debug=False, write_tables=False)
 
 if __name__ == '__main__':
+    print(dir(qn))
     history=history.InMemoryHistory()
     func_completer = completion.WordCompleter(functions.keys())
     while True:
@@ -180,5 +200,8 @@ if __name__ == '__main__':
             print(ex, file=sys.stderr)
             continue
         except SyntaxError as ex:
+            print(ex, file=sys.stderr)
+            continue
+        except TypeError as ex:
             print(ex, file=sys.stderr)
             continue
