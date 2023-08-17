@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "bungcip.better-toml",
     "editorconfig.editorconfig",
     "ms-python.black-formatter",
     "ms-python.isort",
