@@ -19,7 +19,7 @@ authors = [ "Ian <shiyan3@msu.edu>" ]
   prompt-toolkit = "^3.0.39"
 
   [tool.poetry.scripts]
-  calc = "q_calc/parser.py"
+  qalc = "q_calc.parser:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"

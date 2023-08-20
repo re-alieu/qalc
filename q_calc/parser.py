@@ -49,11 +49,11 @@ t_ignore = " \t"
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += t.value.count("\n")
-    
+
 def t_error(t):
     raise SyntaxError("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
-    
+
 # Build the lexer
 import ply.lex as lex
 
@@ -190,13 +190,12 @@ import ply.yacc as yacc
 # write_tables=False makes PLY stop generating the parser python file
 parser = yacc.yacc(debug=False, write_tables=False)
 
-if __name__ == '__main__':
-    print(dir(qn))
-    history=history.InMemoryHistory()
+def main():
+    cmd_history=history.InMemoryHistory()
     func_completer = completion.WordCompleter(functions.keys())
     while True:
         try:
-            s = prompt('Q>', history=history, completer=func_completer)
+            s = prompt('Q>', history=cmd_history, completer=func_completer)
             parser.parse(s)
         except EOFError:
             break
@@ -209,3 +208,6 @@ if __name__ == '__main__':
         except TypeError as ex:
             print(ex, file=sys.stderr)
             continue
+
+if __name__ == '__main__':
+    main()
