@@ -1,4 +1,4 @@
-from q_calc import __version__
+from qalc import __version__
 
 
 def test_version():
