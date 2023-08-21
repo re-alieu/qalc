@@ -3,7 +3,7 @@ requires = [ "poetry-core" ]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "q_calc"
+name = "qalc"
 version = "1.0.0"
 repository = "about:blank"
 license = "MIT"
